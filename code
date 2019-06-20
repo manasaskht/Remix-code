@@ -154,26 +154,49 @@ function delegatevotes459(uint transfer, address _person) public{
       
 
     }
-    uint public largest=0;
-    string public leadingCandidate;
+   uint largest=0;
+    uint public leadingCandidate;
   // to determine the candidate with highest number of votes   
-    function gethighVote459() public returns (uint)
+    function gethighVote459()  public returns(uint)
     {
-         for(uint i=0;i<=(candidates.length);i++)
-    {
-       if((candidates[i].voteCount)>largest)
-       {
-            largest=candidates[i].voteCount;
+         
+         for(uint i=0;i<candidates.length;i++)
+        {
+       
+             if(candidates[i].voteCount>=largest)
+                {
+                largest=candidates[i].voteCount;
            
-            leadingCandidate=candidates[i].Name;
-       }
+                  leadingCandidate=i;
+               } 
+        
       
-    }
-     
-     return largest;
+        }
+     return leadingCandidate;
     }
     
-    // to break the tie when two candidates have same voteCount 
+    // to break the tie when two candidates have same voteCount
+    
+    function tiebreak459(uint _voteIndex) ownerOnly public 
+    {
+      for(uint i=0;i<(candidates.length);i++)
+      {
+          if ((candidates[i].voteCount)==largest)
+          {
+              if (i !=leadingCandidate)
+              {
+                  voters[msg.sender].vote = _voteIndex;
+                  if((_voteIndex==i)&&(_voteIndex==leadingCandidate))
+                  {
+                   candidates[_voteIndex].voteCount +=1;
+                   leadingCandidate=_voteIndex;
+                  }
+                  
+              }
+          }
+      }
+      
+    }
 
    // terminate contract
 
