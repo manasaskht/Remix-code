@@ -1,0 +1,186 @@
+pragma solidity ^0.5.1;
+
+ 
+
+contract Election
+
+{
+    //candidate structure
+
+    struct Candidate{
+
+        string Name;
+
+        uint voteCount;
+
+    }
+// voter structure
+   
+
+    struct Voter
+
+    {
+
+        bool authorized;
+
+        bool voted;
+
+        uint vote;
+        uint count;
+        
+
+    }
+
+   // instead of public or private modifier will be owner
+
+    modifier ownerOnly(){
+
+        require(msg.sender == owner); //who ever deploys can modify this code in ethereum
+
+        _;
+
+    }
+
+   
+
+    address payable public owner;
+
+    string public electionName;
+
+  
+
+    mapping(address => Voter) public voters; // dictionary like a key-value store
+
+   
+
+    Candidate[] public candidates;
+
+    uint public totalVotes;
+
+uint public totalvoters;
+
+// constructor created with input to give election purpose or name
+    constructor (string memory _name) public {
+
+        owner = msg.sender;
+
+        electionName = _name;
+        
+        
+
+    }
+
+  // to add candidates on authorized by owner 
+
+    function addCandidate459(string memory _name) ownerOnly public {
+
+        candidates.push(Candidate(_name,0));
+
+    }
+    
+   
+// to get number of candidates added or participating in election
+   
+    function getNumCandidate459() public view returns(uint){
+
+        return (candidates.length);
+
+    }
+ // to get number of votes left or initialised for each voter   
+        function getvotecount459() public view returns(uint){
+
+        return (voters[msg.sender].count);
+
+    }
+  
+// voters authorised by owner to cast votes
+    function authorize459(address _person) ownerOnly public{
+
+        voters[_person].authorized = true;
+        if (_person!=owner)// if not owner
+        {
+        voters[_person].count=2; // voters are provided with two votes initially once authorized
+        
+        }
+        else
+        {
+             voters[_person].count=1; // if owner only one vote is provided
+        }
+         totalvoters+=1;
+    }
+    // to transfer the given votes to the given address of the voter
+function delegatevotes459(uint transfer, address _person) public{
+   if  ( voters[msg.sender].count>= transfer )
+   {
+       voters[msg.sender].count-=transfer;// decrement count as per the given value of transfer
+       voters[_person].count+=transfer;// increment the same value as decremented
+       
+         
+   }
+}
+
+   // submit vote on checking whether voter is authorised and not voted already
+  // voter can cast two votes or one vote by leaving the other parameter empty
+    function vote459(uint _voteIndex, uint _voteIndex1) public{ 
+      
+
+        require(!voters[msg.sender].voted);
+
+        require(voters[msg.sender].authorized);
+
+     
+     if(msg.sender!=owner)// below logic applies only when voter is not the owner
+     {   
+        voters[msg.sender].vote = _voteIndex;
+       voters[msg.sender].count-=1;
+   
+   candidates[_voteIndex].voteCount +=1;
+        
+        totalVotes += 1;
+  // voter can cast only if the votes count > zero and cast two votes to two diff candidates
+        if((voters[msg.sender].count!=0) && (_voteIndex1!= _voteIndex )) 
+        {
+           voters[msg.sender].vote = _voteIndex1;
+           voters[msg.sender].count-=1;
+   candidates[_voteIndex1].voteCount +=1;// incremented if voter casts two to two diff candidates
+   totalVotes += 1;
+        }
+    
+        
+         voters[msg.sender].voted = true;
+}
+
+      
+      
+
+    }
+    uint public largest=0;
+    string public leadingCandidate;
+  // to determine the candidate with highest number of votes   
+    function gethighVote459() public returns (uint)
+    {
+         for(uint i=0;i<=(candidates.length);i++)
+    {
+       if((candidates[i].voteCount)>largest)
+       {
+            largest=candidates[i].voteCount;
+           
+            leadingCandidate=candidates[i].Name;
+       }
+      
+    }
+     
+     return largest;
+    }
+    
+    // to break the tie when two candidates have same voteCount 
+
+   // terminate contract
+
+    function end459() ownerOnly public{
+
+        selfdestruct(owner);
+
+    }
+
+}
